@@ -60,6 +60,7 @@ import org.delcom.pam_p5_ifs23055.ui.viewmodels.TodoViewModel
 import org.delcom.pam_p5_ifs23055.ui.viewmodels.TodosUIState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.FilterChip
 import androidx.compose.runtime.derivedStateOf
@@ -100,8 +101,7 @@ fun TodosScreen(
         fetchTodosData()
     }
 
-    // ✅ PERBAIKAN UTAMA: Refresh data saat kembali ke TodosScreen
-    // (misalnya setelah tambah/edit/hapus todo)
+    // Refresh data saat kembali ke TodosScreen
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     LaunchedEffect(navBackStackEntry) {
         val currentRoute = navBackStackEntry?.destination?.route
@@ -110,7 +110,7 @@ fun TodosScreen(
         }
     }
 
-    // ✅ Refresh setelah todoAdd sukses (jika user baru saja tambah todo)
+    // Refresh setelah todoAdd sukses
     LaunchedEffect(uiStateTodo.todoAdd) {
         if (uiStateTodo.todoAdd is TodoActionUIState.Success) {
             todoViewModel.uiState.value.todoAdd = TodoActionUIState.Loading
@@ -179,14 +179,15 @@ fun TodosScreen(
         )
 
         // Barisan Filter Chips
-        Column(modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)) {
-            // Row 1: Filter Status
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+            // Baris 1: Filter Status (Gunakan LazyRow agar bisa di-scroll ke samping)
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 val filters = listOf(null to "Semua", "complete" to "Selesai", "active" to "Belum")
-                filters.forEach { (key, label) ->
+                items(filters) { (key, label) ->
                     FilterChip(
                         selected = selectedFilter == key,
                         onClick = { selectedFilter = key; fetchTodosData() },
@@ -195,13 +196,14 @@ fun TodosScreen(
                 }
             }
 
-            // Row 2: Filter Urgensi
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+            // Baris 2: Filter Urgensi (Gunakan LazyRow agar "High" tidak turun ke bawah)
+            LazyRow(
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 val urgencies = listOf(null to "Semua Urgensi", 1 to "Low", 2 to "Medium", 3 to "High")
-                urgencies.forEach { (key, label) ->
+                items(urgencies) { (key, label) ->
                     FilterChip(
                         selected = selectedUrgency == key,
                         onClick = { selectedUrgency = key; fetchTodosData() },
@@ -295,7 +297,7 @@ fun TodoItemUI(
                         modifier = Modifier.weight(1f)
                     )
                     Text(
-                        text = when (todo.urgency) { 3 -> "High"; 2 -> "Med"; else -> "Low" },
+                        text = when (todo.urgency) { 3 -> "High"; 2 -> "Medium"; else -> "Low" },
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
