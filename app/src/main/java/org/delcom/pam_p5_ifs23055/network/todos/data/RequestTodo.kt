@@ -8,5 +8,5 @@ data class RequestTodo (
     val description: String,
     val isDone: Boolean = false,
 
-    val urgency: String = "low"
+    val urgency: Int = 1
 )

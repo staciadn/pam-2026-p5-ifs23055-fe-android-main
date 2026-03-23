@@ -290,7 +290,8 @@ class TodoViewModel @Inject constructor(
                         RequestTodo(
                             title = title,
                             description = description,
-                            isDone = isDone
+                            isDone = isDone,
+                            urgency = urgency
                         )
                     )
                 }.fold(
