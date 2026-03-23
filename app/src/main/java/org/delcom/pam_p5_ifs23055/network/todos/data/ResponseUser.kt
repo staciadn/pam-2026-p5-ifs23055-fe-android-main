@@ -12,7 +12,10 @@ data class ResponseUserData(
     val id: String,
     val name: String,
     val username: String,
+
+    val photo: String? = null,
     val about: String? = null,
+
     val createdAt: String,
     val updatedAt: String
 )

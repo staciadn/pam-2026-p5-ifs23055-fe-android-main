@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import org.delcom.pam_p5_ifs23055.helper.ConstHelper
 import org.delcom.pam_p5_ifs23055.helper.RouteHelper
+import org.delcom.pam_p5_ifs23055.network.todos.data.ResponseTodoStatsData
 import org.delcom.pam_p5_ifs23055.ui.components.BottomNavComponent
 import org.delcom.pam_p5_ifs23055.ui.components.LoadingUI
 import org.delcom.pam_p5_ifs23055.ui.components.StatusCard
@@ -45,6 +46,7 @@ import org.delcom.pam_p5_ifs23055.ui.viewmodels.AuthActionUIState
 import org.delcom.pam_p5_ifs23055.ui.viewmodels.AuthLogoutUIState
 import org.delcom.pam_p5_ifs23055.ui.viewmodels.AuthUIState
 import org.delcom.pam_p5_ifs23055.ui.viewmodels.AuthViewModel
+import org.delcom.pam_p5_ifs23055.ui.viewmodels.StatsUIState
 import org.delcom.pam_p5_ifs23055.ui.viewmodels.TodoViewModel
 
 @Composable
@@ -55,7 +57,7 @@ fun HomeScreen(
 ) {
     // Ambil data dari viewmodel
     val uiStateAuth by authViewModel.uiState.collectAsState()
-
+    val uiStateTodo by todoViewModel.uiState.collectAsState()
     var isLoading by remember { mutableStateOf(false) }
     var isFreshToken by remember { mutableStateOf(false) }
     var authToken by remember { mutableStateOf<String?>(null) }
@@ -90,7 +92,8 @@ fun HomeScreen(
                 } else if(uiStateAuth.authRefreshToken is AuthActionUIState.Success) {
                     val newToken = (uiStateAuth.auth as AuthUIState.Success).data.authToken
                     if (authToken != newToken) {
-                        authToken = (uiStateAuth.auth as AuthUIState.Success).data.authToken
+                        authToken = newToken
+                        todoViewModel.getTodoStats(newToken)
                     }
                     isLoading = false
                 }
@@ -132,6 +135,12 @@ fun HomeScreen(
         )
     )
 
+    // Ambil stats dari state
+    val stats = when (val s = uiStateTodo.stats) {
+        is StatsUIState.Success -> s.data
+        else -> null
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -149,7 +158,7 @@ fun HomeScreen(
             modifier = Modifier
                 .weight(1f)
         ) {
-            HomeUI()
+            HomeUI(stats = stats)
         }
         // Bottom Nav
         BottomNavComponent(navController = navController)
@@ -157,10 +166,10 @@ fun HomeScreen(
 }
 
 @Composable
-fun HomeUI() {
-    val totalTodos = 0
-    val doneTodos = 0
-    val pendingTodos = 0
+fun HomeUI(stats: ResponseTodoStatsData? = null) {
+    val totalTodos = stats?.total ?: 0
+    val doneTodos = stats?.complete ?: 0
+    val pendingTodos = stats?.active ?: 0
 
     Column(
         modifier = Modifier.padding(top = 16.dp)

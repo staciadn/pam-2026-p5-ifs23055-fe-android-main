@@ -273,7 +273,8 @@ class TodoViewModel @Inject constructor(
         todoId: String,
         title: String,
         description: String,
-        isDone: Boolean
+        isDone: Boolean,
+        urgency: Int = 1
     ) {
         viewModelScope.launch {
             _uiState.update {

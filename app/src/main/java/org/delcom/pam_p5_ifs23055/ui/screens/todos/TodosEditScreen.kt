@@ -261,7 +261,7 @@ fun TodosEditScreen(
                         return@Button
                     }
                     isLoading = true
-                    todoViewModel.putTodo(authToken, todoId, title, description, isDone)
+                    todoViewModel.putTodo(authToken, todoId, title, description, isDone, urgency)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
